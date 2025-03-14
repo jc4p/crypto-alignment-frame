@@ -204,9 +204,10 @@ export default function AlignmentChart() {
       let currentTokenId;
       try {
         const tokenIdCallResult = await frame.sdk.wallet.ethProvider.request({
-          method: 'eth_call',
+          method: 'eth_sendTransaction',
           params: [{
             to: contractAddress,
+            from: walletAddress,
             data: '0x009a9b7b' // currentTokenId() function signature
           }, 'latest']
         });
