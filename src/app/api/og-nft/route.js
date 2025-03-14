@@ -2,6 +2,8 @@ import { ImageResponse } from '@vercel/og';
 
 export const runtime = 'edge';
 
+export const maxDuration = 30;
+
 // Load Inter font from our CDN
 const interRegular = fetch(
   new URL('https://images.kasra.codes/Inter_18pt-Regular.ttf', import.meta.url)

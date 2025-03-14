@@ -11,6 +11,7 @@ export default function AlignmentChart() {
   const [error, setError] = useState(null);
   const [shareResult, setShareResult] = useState(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState(false);
   const [isMinting, setIsMinting] = useState(false);
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const [mintStatus, setMintStatus] = useState(null);
@@ -122,6 +123,7 @@ export default function AlignmentChart() {
     try {
       setIsSharing(true);
       setShareResult(null);
+      setShareSuccess(false);
       
       // Construct the URL with query parameters
       const url = new URL('/api/generate-share-image', window.location.origin);
@@ -145,9 +147,23 @@ export default function AlignmentChart() {
         console.error('Share image error:', data.error, data.details);
         setShareResult({ error: data.error });
       } else {
-        // Just console log the URL instead of copying to clipboard
-        console.log('//#TODO: Share', data.imageUrl);
-        setShareResult(data);
+        // Create a Warpcast intent URL for sharing
+        const categoryName = getCategoryName(analysis.category);
+        const shareText = `I'm a ${categoryName} (${analysis.xPosition.toFixed(1)}, ${analysis.yPosition.toFixed(1)}) on the Onchain Alignment Chart! Check out your position:`;
+        const shareUrl = data.imageUrl;
+        
+        const intentUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}`;
+        
+        // Open the Warpcast intent URL
+        try {
+          await window.frame.sdk.actions.openUrl({ url: intentUrl });
+          console.log('Opened Warpcast share intent');
+          setShareSuccess(true);
+        } catch (intentError) {
+          console.error('Error opening Warpcast intent:', intentError);
+          // Fallback to just showing the image URL
+          setShareResult(data);
+        }
       }
     } catch (error) {
       console.error('Error generating share image:', error);
@@ -321,7 +337,7 @@ export default function AlignmentChart() {
             <div className="flex gap-4 justify-center mt-4 mb-8">
               <button
                 onClick={handleShare}
-                disabled={isSharing}
+                disabled={isSharing || shareSuccess}
                 className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSharing ? (
@@ -331,6 +347,13 @@ export default function AlignmentChart() {
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Generating...
+                  </>
+                ) : shareSuccess ? (
+                  <>
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Shared
                   </>
                 ) : (
                   <>
@@ -375,6 +398,13 @@ export default function AlignmentChart() {
               </button>
             </div>
             
+            {/* Share Success Message */}
+            {shareSuccess && (
+              <div className="text-center mb-6 p-3 rounded-md bg-green-100 text-green-800">
+                <p className="font-medium">Your alignment chart has been shared to Warpcast!</p>
+              </div>
+            )}
+            
             {/* Mint Status Display */}
             {(mintStatus === 'success' || mintStatus === 'error') && (
               <div className={`text-center mb-6 p-3 rounded-md ${mintStatus === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
@@ -396,6 +426,7 @@ export default function AlignmentChart() {
                     {mintTokenId !== null && (
                       <p className="text-sm mt-1">Token ID: #{mintTokenId}</p>
                     )}
+                    <p className="text-sm mt-3 font-medium">Check your Warplet for your NFT!</p>
                   </>
                 )}
                 {mintStatus === 'error' && (
