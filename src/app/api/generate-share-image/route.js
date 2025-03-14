@@ -34,13 +34,14 @@ export async function GET(request) {
     const filename = `${fid}-${timestamp}.png`;
     const objectKey = `onchain-analysis/${filename}`;
     
-    // Construct the OG image URL
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    // Get the base URL from the current request
+    const requestUrl = new URL(request.url);
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
     
-    // For local development, use a direct URL without hostname
-    const ogImageUrl = new URL('/api/og', process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : baseUrl);
+    console.log('Base URL for OG image:', baseUrl);
+    
+    // Construct the OG image URL using the same host as the current request
+    const ogImageUrl = new URL('/api/og', baseUrl);
     ogImageUrl.searchParams.set('x', xPosition);
     ogImageUrl.searchParams.set('y', yPosition);
     ogImageUrl.searchParams.set('category', category);

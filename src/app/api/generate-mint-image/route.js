@@ -14,17 +14,40 @@ export async function POST(request) {
       },
     });
 
-    // Generate the NFT image URL
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    // Get the base URL from the current request
+    const requestUrl = new URL(request.url);
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
     
-    const imageUrl = `${baseUrl}/api/og-nft?x=${x}&y=${y}&category=${encodeURIComponent(category)}&username=${encodeURIComponent(username)}${profilePicture ? `&profilePicture=${encodeURIComponent(profilePicture)}` : ''}`;
+    console.log('Base URL for NFT image:', baseUrl);
+    
+    // Construct the OG image URL using the same host as the current request
+    const ogNftUrl = new URL('/api/og-nft', baseUrl);
+    ogNftUrl.searchParams.set('x', x);
+    ogNftUrl.searchParams.set('y', y);
+    ogNftUrl.searchParams.set('category', category);
+    ogNftUrl.searchParams.set('username', username);
+    if (profilePicture) ogNftUrl.searchParams.set('profilePicture', profilePicture);
+    
+    console.log('Fetching OG NFT image from:', ogNftUrl.toString());
 
     // Fetch the generated image
-    const imageResponse = await fetch(imageUrl);
+    const imageResponse = await fetch(ogNftUrl.toString(), {
+      // Add a longer timeout for image generation
+      signal: AbortSignal.timeout(30000), // 30 seconds timeout
+    });
+    
     if (!imageResponse.ok) {
-      throw new Error('Failed to generate NFT image');
+      const errorText = await imageResponse.text();
+      throw new Error(`Failed to generate NFT image: ${imageResponse.status} ${imageResponse.statusText}. Details: ${errorText}`);
     }
+    
     const imageBuffer = await imageResponse.arrayBuffer();
+    
+    if (!imageBuffer || imageBuffer.byteLength === 0) {
+      throw new Error('Generated image is empty');
+    }
+    
+    console.log(`Successfully generated NFT image: ${imageBuffer.byteLength} bytes`);
 
     // Generate a unique filename using timestamp and username
     const timestamp = Date.now();
