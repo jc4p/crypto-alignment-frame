@@ -379,7 +379,7 @@ const targetURLTwo = '' // Another link, or even a link to an image
 
 const finalUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(targetText)}&embeds[]=${encodeURIComponent(targetURL)}&embeds[]=${encodeURIComponent(targetURLTwo)}`;
 
-await sdk.actions.openUrl({ url: finalUrl })
+await sdk.actions.openUrl(finalUrl)
 ```
 
 While this will correctly create the cast intent and show the text and the target links, if the user modifies the text of the cast the second will link disappear.

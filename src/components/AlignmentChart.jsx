@@ -144,7 +144,7 @@ export default function AlignmentChart() {
       const data = await response.json();
       
       if (data.error) {
-        console.error('Share image error:', data.error, data.details);
+        alert('Share image error: ' + data.error);
         setShareResult({ error: data.error });
       } else {
         // Create a Warpcast intent URL for sharing
@@ -156,17 +156,16 @@ export default function AlignmentChart() {
         
         // Open the Warpcast intent URL
         try {
-          await frame.sdk.actions.openUrl({ url: intentUrl });
-          console.log('Opened Warpcast share intent');
+          await frame.sdk.actions.openUrl(intentUrl);
           setShareSuccess(true);
         } catch (intentError) {
-          console.error('Error opening Warpcast intent:', intentError);
+          alert('Error opening Warpcast intent: ' + intentError.message);
           // Fallback to just showing the image URL
           setShareResult(data);
         }
       }
     } catch (error) {
-      console.error('Error generating share image:', error);
+      alert('Error generating share image: ' + error.message);
       setShareResult({ error: error.message });
     } finally {
       setIsSharing(false);
@@ -185,6 +184,7 @@ export default function AlignmentChart() {
       
       // Check if we're in a frame with wallet access
       if (!frame?.sdk?.wallet?.ethProvider) {
+        alert('Wallet provider not available');
         throw new Error('Wallet provider not available. Please use Warpcast to mint.');
       }
       
@@ -195,9 +195,8 @@ export default function AlignmentChart() {
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: '0x2105' }] // Base mainnet chainId
         });
-        console.log('Successfully switched to Base');
       } catch (switchError) {
-        console.error('Failed to switch network:', switchError);
+        alert('Failed to switch network: ' + switchError.message);
         throw new Error('Failed to switch to Base network. Please try again.');
       }
       
@@ -214,9 +213,9 @@ export default function AlignmentChart() {
         
         // Convert hex result to number
         currentTokenId = parseInt(tokenIdCallResult, 16);
-        console.log('Current token ID before minting:', currentTokenId);
+        alert('Current token ID: ' + currentTokenId);
       } catch (tokenIdError) {
-        console.error('Error getting current token ID:', tokenIdError);
+        alert('Error getting token ID: ' + tokenIdError.message);
         // Continue with minting even if we couldn't get the current token ID
       }
       
@@ -226,7 +225,6 @@ export default function AlignmentChart() {
         method: 'eth_requestAccounts'
       });
       const walletAddress = accounts[0];
-      console.log('Wallet address:', walletAddress);
       
       // Create the mint function signature
       const mintFunctionSignature = '0x1249c58b'; // keccak256('mint()')
@@ -242,19 +240,19 @@ export default function AlignmentChart() {
         }]
       });
       
-      console.log('Mint transaction sent:', txHash);
       setMintTxHash(txHash);
       setMintStatus('success');
+      alert('Mint transaction sent: ' + txHash);
       
       // If we got the current token ID before minting, the new token ID should be the next one
       if (currentTokenId !== undefined) {
         const newTokenId = currentTokenId + 1;
         setMintTokenId(newTokenId);
-        console.log('Expected new token ID:', newTokenId);
         
-        // Save to DB - you can implement this part later
+        // Save to DB
         try {
-          await fetch('/api/save-mint', {
+          alert('Saving mint data for token ID: ' + newTokenId);
+          const saveResponse = await fetch('/api/save-mint', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -270,14 +268,23 @@ export default function AlignmentChart() {
               username: userInfo?.username || 'Anonymous',
             }),
           });
+          
+          if (!saveResponse.ok) {
+            const errorText = await saveResponse.text();
+            alert('Save mint error: ' + errorText);
+            throw new Error('Failed to save mint data: ' + errorText);
+          }
+          
+          const saveData = await saveResponse.json();
+          alert('Save mint success: ' + JSON.stringify(saveData));
         } catch (saveError) {
-          console.error('Error saving mint data:', saveError);
+          alert('Error saving mint data: ' + saveError.message);
           // Don't throw here, we still want to show success for the mint
         }
       }
       
     } catch (error) {
-      console.error('Error minting NFT:', error);
+      alert('Error minting NFT: ' + error.message);
       setMintStatus('error');
       setMintTxHash(null);
     } finally {
