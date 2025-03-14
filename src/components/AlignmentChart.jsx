@@ -144,13 +144,16 @@ export default function AlignmentChart() {
       const data = await response.json();
       
       if (data.error) {
-        alert('Share image error: ' + data.error);
+        console.error('Share image error:', data.error);
         setShareResult({ error: data.error });
       } else {
         // Create a Warpcast intent URL for sharing
         const categoryName = getCategoryName(analysis.category);
         const shareText = `I'm a ${categoryName} (${analysis.xPosition.toFixed(1)}, ${analysis.yPosition.toFixed(1)}) on the Onchain Alignment Chart! Check out your position:`;
-        const shareUrl = data.imageUrl;
+        
+        // Extract just the filename from the imageUrl and create a new URL with NEXT_PUBLIC_BASE_URL
+        const filename = data.filename; // The API now returns the filename directly
+        const shareUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/image?=${filename}`;
         
         const intentUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}`;
         
@@ -159,13 +162,13 @@ export default function AlignmentChart() {
           await frame.sdk.actions.openUrl(intentUrl);
           setShareSuccess(true);
         } catch (intentError) {
-          alert('Error opening Warpcast intent: ' + intentError.message);
+          console.error('Error opening Warpcast intent:', intentError);
           // Fallback to just showing the image URL
           setShareResult(data);
         }
       }
     } catch (error) {
-      alert('Error generating share image: ' + error.message);
+      console.error('Error generating share image:', error);
       setShareResult({ error: error.message });
     } finally {
       setIsSharing(false);
