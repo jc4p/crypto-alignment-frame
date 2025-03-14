@@ -200,24 +200,25 @@ export default function AlignmentChart() {
         throw new Error('Failed to switch to Base network. Please try again.');
       }
       
-      // Get current token ID before minting to handle race condition
-      let currentTokenId;
+      // Get the next token ID from our database
+      let nextTokenId;
       try {
-        const tokenIdCallResult = await frame.sdk.wallet.ethProvider.request({
-          method: 'eth_sendTransaction',
-          params: [{
-            to: contractAddress,
-            from: walletAddress,
-            data: '0x009a9b7b' // currentTokenId() function signature
-          }, 'latest']
-        });
+        setMintStatus('getting_token_id');
+        const tokenIdResponse = await fetch('/api/get-latest-token-id');
         
-        // Convert hex result to number
-        currentTokenId = parseInt(tokenIdCallResult, 16);
-        alert('Current token ID: ' + currentTokenId);
+        if (!tokenIdResponse.ok) {
+          const errorData = await tokenIdResponse.json();
+          console.error('Error getting token ID:', errorData);
+          throw new Error(`Failed to get latest token ID: ${errorData.error || tokenIdResponse.statusText}`);
+        }
+        
+        const tokenIdData = await tokenIdResponse.json();
+        nextTokenId = tokenIdData.nextTokenId; // Use the nextTokenId directly
+        console.log('Next token ID from database:', nextTokenId);
       } catch (tokenIdError) {
-        alert('Error getting token ID: ' + tokenIdError.message);
-        // Continue with minting even if we couldn't get the current token ID
+        console.error('Error getting token ID from database:', tokenIdError);
+        // Continue with minting even if we couldn't get the next token ID
+        // We'll handle this case after minting
       }
       
       // Get the user's wallet address
@@ -243,23 +244,22 @@ export default function AlignmentChart() {
       
       setMintTxHash(txHash);
       setMintStatus('success');
-      alert('Mint transaction sent: ' + txHash);
+      console.log('Mint transaction sent:', txHash);
       
-      // If we got the current token ID before minting, the new token ID should be the next one
-      if (currentTokenId !== undefined) {
-        const newTokenId = currentTokenId + 1;
-        setMintTokenId(newTokenId);
+      // If we got the next token ID, use it
+      if (nextTokenId !== undefined) {
+        setMintTokenId(nextTokenId);
         
         // Save to DB
         try {
-          alert('Saving mint data for token ID: ' + newTokenId);
+          console.log('Saving mint data for token ID:', nextTokenId);
           const saveResponse = await fetch('/api/save-mint', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              tokenId: newTokenId,
+              tokenId: nextTokenId,
               txHash,
               walletAddress,
               x: analysis.xPosition,
@@ -272,20 +272,58 @@ export default function AlignmentChart() {
           
           if (!saveResponse.ok) {
             const errorText = await saveResponse.text();
-            alert('Save mint error: ' + errorText);
+            console.error('Save mint error:', errorText);
             throw new Error('Failed to save mint data: ' + errorText);
           }
           
           const saveData = await saveResponse.json();
-          alert('Save mint success: ' + JSON.stringify(saveData));
+          console.log('Save mint success:', saveData);
         } catch (saveError) {
-          alert('Error saving mint data: ' + saveError.message);
+          console.error('Error saving mint data:', saveError);
+          // Don't throw here, we still want to show success for the mint
+        }
+      } else {
+        // If we couldn't get the next token ID, we'll save without it
+        // The backend will need to determine the token ID later
+        try {
+          console.log('Saving mint data without token ID');
+          const saveResponse = await fetch('/api/save-mint', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              txHash,
+              walletAddress,
+              x: analysis.xPosition,
+              y: analysis.yPosition,
+              category: analysis.category,
+              fid: userInfo?.fid,
+              username: userInfo?.username || 'Anonymous',
+            }),
+          });
+          
+          if (!saveResponse.ok) {
+            const errorText = await saveResponse.text();
+            console.error('Save mint error:', errorText);
+            throw new Error('Failed to save mint data: ' + errorText);
+          }
+          
+          const saveData = await saveResponse.json();
+          console.log('Save mint success:', saveData);
+          
+          // If the backend was able to determine the token ID, use it
+          if (saveData.tokenId) {
+            setMintTokenId(saveData.tokenId);
+          }
+        } catch (saveError) {
+          console.error('Error saving mint data:', saveError);
           // Don't throw here, we still want to show success for the mint
         }
       }
       
     } catch (error) {
-      alert('Error minting NFT: ' + error.message);
+      console.error('Error minting NFT:', error);
       setMintStatus('error');
       setMintTxHash(null);
     } finally {

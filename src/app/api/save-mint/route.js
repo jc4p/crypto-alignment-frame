@@ -17,12 +17,34 @@ export async function POST(request) {
       username 
     } = body;
     
-    // Validate required fields
-    if (!tokenId || !txHash || !walletAddress || !x || !y || !category) {
+    // Validate required fields (tokenId is now optional)
+    if (!txHash || !walletAddress || !x || !y || !category) {
       return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+    
+    // If tokenId is not provided, get the next available token ID
+    let finalTokenId = tokenId;
+    if (!finalTokenId) {
+      try {
+        const tokenIdResult = await query(
+          'SELECT MAX(token_id) as max_token_id FROM onchain_analysis_nfts'
+        );
+        const latestTokenId = tokenIdResult.rows[0]?.max_token_id || 0;
+        finalTokenId = latestTokenId + 1;
+        console.log('Generated next token ID:', finalTokenId);
+      } catch (tokenIdError) {
+        console.error('Error getting next token ID:', tokenIdError);
+        return new Response(JSON.stringify({ 
+          error: 'Failed to generate token ID',
+          details: tokenIdError.message
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
     }
     
     // Generate the NFT image using the existing endpoint
@@ -70,7 +92,7 @@ export async function POST(request) {
     `;
     
     const values = [
-      tokenId,
+      finalTokenId,
       txHash,
       walletAddress,
       fid || null,
@@ -88,7 +110,7 @@ export async function POST(request) {
       JSON.stringify({
         success: true,
         id: insertedId,
-        tokenId,
+        tokenId: finalTokenId,
         imageUrl,
       }),
       {
