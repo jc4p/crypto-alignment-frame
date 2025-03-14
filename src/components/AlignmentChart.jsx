@@ -151,9 +151,8 @@ export default function AlignmentChart() {
         const categoryName = getCategoryName(analysis.category);
         const shareText = `I'm a ${categoryName} (${analysis.xPosition.toFixed(1)}, ${analysis.yPosition.toFixed(1)}) on the Onchain Alignment Chart! Check out your position:`;
         
-        // Extract just the filename from the imageUrl and create a new URL with NEXT_PUBLIC_BASE_URL
         const filename = data.filename; // The API now returns the filename directly
-        const shareUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/image?=${filename}`;
+        const shareUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/?image=${filename}`;
         
         const intentUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}`;
         
