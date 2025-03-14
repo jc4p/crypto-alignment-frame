@@ -14,6 +14,4 @@ export async function initializeFrame() {
   }
 
   window.userFid = user.fid;
-  
-  // Remove the ready() call from here - we'll call it from AlignmentChart
-} 
+  } 
