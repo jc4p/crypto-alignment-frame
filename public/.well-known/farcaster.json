@@ -1,0 +1,17 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjk3NzIzMywidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGE2N0JhMDI4MTIzMWVCOUUyZWE0Y0Y5Nzg5NGMwYjBiNUI4MDFDYzYifQ",
+    "payload": "eyJkb21haW4iOiJvbmNoYWluLWFuYWx5c2lzLmthc3JhLmNvZGVzIn0",
+    "signature": "MHhkMTQ5OTAwZmExNDVkNzdkZWM4MDVhMzZiOGRiZDg5ODczZThiOGUyOGFhYTBmMGI1OTllYTczNjAyOTY0MjE2NGJhMGE0MWU1MTc4NDJkMmZmZWU5MjY4ODJiNTM1MDkzMTk1NjZmOWI0YmRmNjg3MmVhNWI5MWVhNmJjOThhMjFi"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Onchain Analysis",
+    "iconUrl": "https://images.kasra.codes/onchain-analysis/onchain-analysis-square-image.png",
+    "homeUrl": "https://onchain-analysis.kasra.codes",
+    "imageUrl": "https://images.kasra.codes/onchain-analysis/default.png",
+    "buttonTitle": "Analyze Your Profile",
+    "splashImageUrl": "https://images.kasra.codes/onchain-analysis/onchain-analysis-square-image.png",
+    "splashBackgroundColor": "#FFFFFF"
+  }
+}
