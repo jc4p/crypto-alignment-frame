@@ -18,7 +18,7 @@ export const generateMetadata = async ({ searchParams }) => {
           title: "Analyze Your Profile",
           action: {
             type: "launch_frame",
-            name: "Onchain Analysis",
+            name: "Onchain Alignment Chart",
             url: process.env.NEXT_PUBLIC_BASE_URL,
             splashImageUrl: "https://images.kasra.codes/onchain-analysis/onchain-analysis-square-image.png",
             splashBackgroundColor: "#ffffff"
