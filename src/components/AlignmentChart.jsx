@@ -156,7 +156,7 @@ export default function AlignmentChart() {
         
         // Open the Warpcast intent URL
         try {
-          await window.frame.sdk.actions.openUrl({ url: intentUrl });
+          await frame.sdk.actions.openUrl({ url: intentUrl });
           console.log('Opened Warpcast share intent');
           setShareSuccess(true);
         } catch (intentError) {
@@ -184,14 +184,14 @@ export default function AlignmentChart() {
       const contractAddress = '0xEb11624eBa7973d415CEfB265ec1EC80ac114ddd';
       
       // Check if we're in a frame with wallet access
-      if (!window.frame?.sdk?.wallet?.ethProvider) {
+      if (!frame?.sdk?.wallet?.ethProvider) {
         throw new Error('Wallet provider not available. Please use Warpcast to mint.');
       }
       
       // Switch to Base network
       setMintStatus('switching');
       try {
-        await window.frame.sdk.wallet.ethProvider.request({
+        await frame.sdk.wallet.ethProvider.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: '0x2105' }] // Base mainnet chainId
         });
@@ -204,7 +204,7 @@ export default function AlignmentChart() {
       // Get current token ID before minting to handle race condition
       let currentTokenId;
       try {
-        const tokenIdCallResult = await window.frame.sdk.wallet.ethProvider.request({
+        const tokenIdCallResult = await frame.sdk.wallet.ethProvider.request({
           method: 'eth_call',
           params: [{
             to: contractAddress,
@@ -222,7 +222,7 @@ export default function AlignmentChart() {
       
       // Get the user's wallet address
       setMintStatus('connecting');
-      const accounts = await window.frame.sdk.wallet.ethProvider.request({
+      const accounts = await frame.sdk.wallet.ethProvider.request({
         method: 'eth_requestAccounts'
       });
       const walletAddress = accounts[0];
@@ -233,7 +233,7 @@ export default function AlignmentChart() {
       
       // Send the transaction
       setMintStatus('minting');
-      const txHash = await window.frame.sdk.wallet.ethProvider.request({
+      const txHash = await frame.sdk.wallet.ethProvider.request({
         method: 'eth_sendTransaction',
         params: [{
           from: walletAddress,

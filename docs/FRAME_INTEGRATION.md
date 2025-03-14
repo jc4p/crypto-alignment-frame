@@ -318,7 +318,7 @@ try {
 
   const functionPayload = functionSignature + paddedAddress;
 
-  contractData = await window.frame.sdk.wallet.ethProvider.request({
+  contractData = await frame.sdk.wallet.ethProvider.request({
     method: 'eth_call',
     params: [{
         to: CONTRACT_ADDRESS,
