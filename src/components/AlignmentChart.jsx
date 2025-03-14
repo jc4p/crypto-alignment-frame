@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import HomeComponent from "./HomeComponent";
-import * as frameSdk from '@farcaster/frame-sdk';
+import * as frame from '@farcaster/frame-sdk';
 
 export default function AlignmentChart() {
   const [loading, setLoading] = useState(false);
@@ -35,7 +35,7 @@ export default function AlignmentChart() {
 
         // Call ready() here after we've started loading but before the API call
         try {
-          await frameSdk.sdk.actions.ready();
+          await frame.sdk.actions.ready();
           console.log('Frame ready called');
         } catch (e) {
           console.log('Not in a frame or ready already called', e);
