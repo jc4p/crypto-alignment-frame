@@ -34,6 +34,32 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
     top: `${((10 - y) / 20) * 100}%`,
   });
   
+  // Group friends by quadrant
+  const getFriendsByQuadrant = (friendsList) => {
+    const quadrants = {
+      'Builder/Pragmatist': [],    // x < 0, y > 0 (top-left)
+      'Builder/Decentralist': [],  // x < 0, y < 0 (bottom-left)
+      'Speculator/Pragmatist': [], // x > 0, y > 0 (top-right)
+      'Speculator/Decentralist': [] // x > 0, y < 0 (bottom-right)
+    };
+    
+    friendsList.forEach(friend => {
+      if (!friend.position || typeof friend.position.x !== 'number' || typeof friend.position.y !== 'number') {
+        return;
+      }
+      
+      const { x, y } = friend.position;
+      
+      if (x < 0 && y > 0) quadrants['Builder/Pragmatist'].push(friend);
+      else if (x < 0 && y < 0) quadrants['Builder/Decentralist'].push(friend);
+      else if (x > 0 && y > 0) quadrants['Speculator/Pragmatist'].push(friend);
+      else if (x > 0 && y < 0) quadrants['Speculator/Decentralist'].push(friend);
+      // Points exactly on axes can be ignored or put in a separate category
+    });
+    
+    return quadrants;
+  };
+  
   // Apply collision avoidance
   useEffect(() => {
     if (!friends || friends.length === 0) {
@@ -109,6 +135,7 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
   }, [friends]);
   
   const friendsToRender = adjustedFriends.length > 0 ? adjustedFriends : friends;
+  const friendsByQuadrant = getFriendsByQuadrant(friendsToRender);
   
   return (
     <div className="w-full max-w-full overflow-hidden">
@@ -233,6 +260,151 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
           </div>
         </div>
       </div>
+      
+      {/* Friends list by quadrant - only shown when friends are displayed */}
+      {friendsToRender && friendsToRender.length > 0 && (
+        <div className="w-[80%] max-w-[500px] mx-auto mt-6 mb-8">
+          <h3 className="text-lg font-semibold mb-3 text-center">Friends by Quadrant</h3>
+          
+          <div className="grid grid-cols-2 gap-4">
+            {/* Builder/Pragmatist (Top Left) */}
+            <div className="border rounded-md p-3 bg-blue-50">
+              <h4 className="font-medium text-sm mb-2 text-blue-900">Builder / Pragmatist</h4>
+              {friendsByQuadrant['Builder/Pragmatist'].length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {friendsByQuadrant['Builder/Pragmatist'].map((friend, index) => (
+                    <div 
+                      key={`bp-${index}`} 
+                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-blue-500"
+                      title={friend.display_name || friend.username || 'Friend'}
+                    >
+                      {friend.profile_picture ? (
+                        <img 
+                          src={friend.profile_picture} 
+                          alt={friend.display_name || friend.username || 'Friend'} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : friend.image_url ? (
+                        <img 
+                          src={friend.image_url} 
+                          alt={friend.display_name || friend.username || 'Friend'} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-blue-500"></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500 italic">No friends in this quadrant</div>
+              )}
+            </div>
+            
+            {/* Speculator/Pragmatist (Top Right) */}
+            <div className="border rounded-md p-3 bg-red-50">
+              <h4 className="font-medium text-sm mb-2 text-red-900">Speculator / Pragmatist</h4>
+              {friendsByQuadrant['Speculator/Pragmatist'].length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {friendsByQuadrant['Speculator/Pragmatist'].map((friend, index) => (
+                    <div 
+                      key={`sp-${index}`} 
+                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-red-500"
+                      title={friend.display_name || friend.username || 'Friend'}
+                    >
+                      {friend.profile_picture ? (
+                        <img 
+                          src={friend.profile_picture} 
+                          alt={friend.display_name || friend.username || 'Friend'} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : friend.image_url ? (
+                        <img 
+                          src={friend.image_url} 
+                          alt={friend.display_name || friend.username || 'Friend'} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-red-500"></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500 italic">No friends in this quadrant</div>
+              )}
+            </div>
+            
+            {/* Builder/Decentralist (Bottom Left) */}
+            <div className="border rounded-md p-3 bg-yellow-50">
+              <h4 className="font-medium text-sm mb-2 text-yellow-900">Builder / Decentralist</h4>
+              {friendsByQuadrant['Builder/Decentralist'].length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {friendsByQuadrant['Builder/Decentralist'].map((friend, index) => (
+                    <div 
+                      key={`bd-${index}`} 
+                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-yellow-600"
+                      title={friend.display_name || friend.username || 'Friend'}
+                    >
+                      {friend.profile_picture ? (
+                        <img 
+                          src={friend.profile_picture} 
+                          alt={friend.display_name || friend.username || 'Friend'} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : friend.image_url ? (
+                        <img 
+                          src={friend.image_url} 
+                          alt={friend.display_name || friend.username || 'Friend'} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-yellow-600"></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500 italic">No friends in this quadrant</div>
+              )}
+            </div>
+            
+            {/* Speculator/Decentralist (Bottom Right) */}
+            <div className="border rounded-md p-3 bg-purple-50">
+              <h4 className="font-medium text-sm mb-2 text-purple-900">Speculator / Decentralist</h4>
+              {friendsByQuadrant['Speculator/Decentralist'].length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {friendsByQuadrant['Speculator/Decentralist'].map((friend, index) => (
+                    <div 
+                      key={`sd-${index}`} 
+                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-purple-500"
+                      title={friend.display_name || friend.username || 'Friend'}
+                    >
+                      {friend.profile_picture ? (
+                        <img 
+                          src={friend.profile_picture} 
+                          alt={friend.display_name || friend.username || 'Friend'} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : friend.image_url ? (
+                        <img 
+                          src={friend.image_url} 
+                          alt={friend.display_name || friend.username || 'Friend'} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-purple-500"></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500 italic">No friends in this quadrant</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
