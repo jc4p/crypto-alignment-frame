@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import * as frame from '@farcaster/frame-sdk'
 
 const HomeComponent = ({ position, profilePicture, friends = [] }) => {
   const [windowWidth, setWindowWidth] = useState(0);
@@ -136,6 +137,17 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
   
   const friendsToRender = adjustedFriends.length > 0 ? adjustedFriends : friends;
   const friendsByQuadrant = getFriendsByQuadrant(friendsToRender);
+  
+  // Add a handler function for viewing profiles
+  const handleViewProfile = async (fid) => {
+    if (fid) {
+      try {
+        await frame.sdk.actions.viewProfile({ fid });
+      } catch (error) {
+        console.error("Error viewing profile:", error);
+      }
+    }
+  };
   
   return (
     <div className="w-full max-w-full overflow-hidden">
@@ -278,8 +290,9 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
                   {friendsByQuadrant['Builder/Pragmatist'].map((friend, index) => (
                     <div 
                       key={`bp-${index}`} 
-                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-blue-500"
+                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-blue-500 cursor-pointer"
                       title={friend.display_name || friend.username || 'Friend'}
+                      onClick={() => handleViewProfile(friend.fid)}
                     >
                       {friend.profile_picture ? (
                         <img 
@@ -315,8 +328,9 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
                   {friendsByQuadrant['Speculator/Pragmatist'].map((friend, index) => (
                     <div 
                       key={`sp-${index}`} 
-                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-red-500"
+                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-red-500 cursor-pointer"
                       title={friend.display_name || friend.username || 'Friend'}
+                      onClick={() => handleViewProfile(friend.fid)}
                     >
                       {friend.profile_picture ? (
                         <img 
@@ -352,8 +366,9 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
                   {friendsByQuadrant['Builder/Decentralist'].map((friend, index) => (
                     <div 
                       key={`bd-${index}`} 
-                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-blue-500"
+                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-blue-500 cursor-pointer"
                       title={friend.display_name || friend.username || 'Friend'}
+                      onClick={() => handleViewProfile(friend.fid)}
                     >
                       {friend.profile_picture ? (
                         <img 
@@ -389,8 +404,9 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
                   {friendsByQuadrant['Speculator/Decentralist'].map((friend, index) => (
                     <div 
                       key={`sd-${index}`} 
-                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-red-500"
+                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-red-500 cursor-pointer"
                       title={friend.display_name || friend.username || 'Friend'}
+                      onClick={() => handleViewProfile(friend.fid)}
                     >
                       {friend.profile_picture ? (
                         <img 
