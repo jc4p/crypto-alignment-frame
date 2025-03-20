@@ -17,6 +17,10 @@ export default function AlignmentChart() {
   const [mintStatus, setMintStatus] = useState(null);
   const [mintTxHash, setMintTxHash] = useState(null);
   const [mintTokenId, setMintTokenId] = useState(null);
+  const [friends, setFriends] = useState([]);
+  const [loadingFriends, setLoadingFriends] = useState(false);
+  const [showFriends, setShowFriends] = useState(false);
+  const [friendsError, setFriendsError] = useState(null);
 
   useEffect(() => {
     const fetchCasts = async () => {
@@ -333,6 +337,44 @@ export default function AlignmentChart() {
     }
   };
 
+  // Add new function to fetch friends
+  const handleShowFriends = async () => {
+    if (!window.userFid || loadingFriends) return;
+    
+    try {
+      setLoadingFriends(true);
+      setFriendsError(null);
+      
+      // Call our new API endpoint
+      const response = await fetch(`/api/find-friends?fid=${window.userFid}`);
+      const data = await response.json();
+      
+      if (data.error) {
+        console.error('Friends API error:', data.error);
+        setFriendsError(data.error);
+        return;
+      }
+      
+      console.log(`Found ${data.friends_count} friends with NFTs`);
+      setFriends(data.friends || []);
+      setShowFriends(true);
+    } catch (error) {
+      console.error('Error fetching friends:', error);
+      setFriendsError('Failed to fetch friends data');
+    } finally {
+      setLoadingFriends(false);
+    }
+  };
+
+  // Helper to toggle friends visibility
+  const toggleFriends = () => {
+    if (friends.length > 0) {
+      setShowFriends(!showFriends);
+    } else if (!loadingFriends) {
+      handleShowFriends();
+    }
+  };
+
   // Full-screen loading overlay
   if (loading) {
     return (
@@ -363,11 +405,72 @@ export default function AlignmentChart() {
             </span>
           </div>
         )}
+        
+        {/* Show Friends Button */}
+        {analysis && (
+          <div className="mt-3">
+            <button
+              onClick={toggleFriends}
+              disabled={loadingFriends}
+              className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loadingFriends ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading...
+                </>
+              ) : friends.length > 0 && showFriends ? (
+                <>
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                  Hide Friends
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  Show Friends
+                </>
+              )}
+            </button>
+          </div>
+        )}
+        
+        {/* Friends Status Display */}
+        {loadingFriends && (
+          <div className="text-center mt-2">
+            <div className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+              Loading friends...
+            </div>
+          </div>
+        )}
+        
+        {!loadingFriends && showFriends && friends.length > 0 && (
+          <div className="text-center mt-2">
+            <div className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+              Showing {friends.length} friends
+            </div>
+          </div>
+        )}
+        
+        {friendsError && (
+          <div className="text-center mt-2">
+            <div className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">
+              {friendsError}
+            </div>
+          </div>
+        )}
       </header>
       <main className="flex flex-col items-center pt-4">
         <HomeComponent 
           position={analysis ? { x: analysis.xPosition, y: analysis.yPosition } : null} 
           profilePicture={userInfo?.profilePicture}
+          friends={showFriends ? friends : []}
         />
         
         {analysis && (
