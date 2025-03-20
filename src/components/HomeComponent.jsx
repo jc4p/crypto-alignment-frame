@@ -269,7 +269,10 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
           <div className="grid grid-cols-2 gap-4">
             {/* Builder/Pragmatist (Top Left) */}
             <div className="border rounded-md p-3 bg-blue-50">
-              <h4 className="font-medium text-sm mb-2 text-blue-900">Builder / Pragmatist</h4>
+              <h4 className="font-medium text-sm mb-2 text-blue-900">
+                <span className="bg-blue-100 px-2 py-0.5 rounded-full mr-1">Builder</span> / 
+                <span className="bg-green-100 px-2 py-0.5 rounded-full ml-1">Pragmatist</span>
+              </h4>
               {friendsByQuadrant['Builder/Pragmatist'].length > 0 ? (
                 <div className="flex flex-wrap gap-1">
                   {friendsByQuadrant['Builder/Pragmatist'].map((friend, index) => (
@@ -303,7 +306,10 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
             
             {/* Speculator/Pragmatist (Top Right) */}
             <div className="border rounded-md p-3 bg-red-50">
-              <h4 className="font-medium text-sm mb-2 text-red-900">Speculator / Pragmatist</h4>
+              <h4 className="font-medium text-sm mb-2 text-red-900">
+                <span className="bg-red-100 px-2 py-0.5 rounded-full mr-1">Speculator</span> / 
+                <span className="bg-green-100 px-2 py-0.5 rounded-full ml-1">Pragmatist</span>
+              </h4>
               {friendsByQuadrant['Speculator/Pragmatist'].length > 0 ? (
                 <div className="flex flex-wrap gap-1">
                   {friendsByQuadrant['Speculator/Pragmatist'].map((friend, index) => (
@@ -336,14 +342,17 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
             </div>
             
             {/* Builder/Decentralist (Bottom Left) */}
-            <div className="border rounded-md p-3 bg-yellow-50">
-              <h4 className="font-medium text-sm mb-2 text-yellow-900">Builder / Decentralist</h4>
+            <div className="border rounded-md p-3 bg-blue-50">
+              <h4 className="font-medium text-sm mb-2 text-blue-900">
+                <span className="bg-blue-100 px-2 py-0.5 rounded-full mr-1">Builder</span> / 
+                <span className="bg-yellow-100 px-2 py-0.5 rounded-full ml-1">Decentralist</span>
+              </h4>
               {friendsByQuadrant['Builder/Decentralist'].length > 0 ? (
                 <div className="flex flex-wrap gap-1">
                   {friendsByQuadrant['Builder/Decentralist'].map((friend, index) => (
                     <div 
                       key={`bd-${index}`} 
-                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-yellow-600"
+                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-blue-500"
                       title={friend.display_name || friend.username || 'Friend'}
                     >
                       {friend.profile_picture ? (
@@ -359,7 +368,7 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-yellow-600"></div>
+                        <div className="w-full h-full bg-blue-500"></div>
                       )}
                     </div>
                   ))}
@@ -370,14 +379,17 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
             </div>
             
             {/* Speculator/Decentralist (Bottom Right) */}
-            <div className="border rounded-md p-3 bg-purple-50">
-              <h4 className="font-medium text-sm mb-2 text-purple-900">Speculator / Decentralist</h4>
+            <div className="border rounded-md p-3 bg-red-50">
+              <h4 className="font-medium text-sm mb-2 text-red-900">
+                <span className="bg-red-100 px-2 py-0.5 rounded-full mr-1">Speculator</span> / 
+                <span className="bg-yellow-100 px-2 py-0.5 rounded-full ml-1">Decentralist</span>
+              </h4>
               {friendsByQuadrant['Speculator/Decentralist'].length > 0 ? (
                 <div className="flex flex-wrap gap-1">
                   {friendsByQuadrant['Speculator/Decentralist'].map((friend, index) => (
                     <div 
                       key={`sd-${index}`} 
-                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-purple-500"
+                      className="w-8 h-8 rounded-full overflow-hidden border-2 border-red-500"
                       title={friend.display_name || friend.username || 'Friend'}
                     >
                       {friend.profile_picture ? (
@@ -393,7 +405,7 @@ const HomeComponent = ({ position, profilePicture, friends = [] }) => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-purple-500"></div>
+                        <div className="w-full h-full bg-red-500"></div>
                       )}
                     </div>
                   ))}
