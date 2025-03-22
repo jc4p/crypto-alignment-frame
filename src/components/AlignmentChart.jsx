@@ -271,7 +271,7 @@ export default function AlignmentChart() {
               x: analysis.xPosition,
               y: analysis.yPosition,
               category: analysis.category,
-              fid: userInfo?.fid,
+              fid: window.userFid,
               username: userInfo?.username || 'Anonymous',
             }),
           });
