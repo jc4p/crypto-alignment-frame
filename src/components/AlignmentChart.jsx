@@ -21,6 +21,7 @@ export default function AlignmentChart() {
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [showFriends, setShowFriends] = useState(false);
   const [friendsError, setFriendsError] = useState(null);
+  const [includeReplies, setIncludeReplies] = useState(false);
 
   useEffect(() => {
     const fetchCasts = async () => {
@@ -45,7 +46,7 @@ export default function AlignmentChart() {
           console.log('Not in a frame or ready already called', e);
         }
 
-        const response = await fetch(`/api/analyze-profile?fid=${window.userFid}&limit=150&include_replies=false`);
+        const response = await fetch(`/api/analyze-profile?fid=${window.userFid}&limit=150&include_replies=${includeReplies}`);
         const data = await response.json();
         
         if (data.error) {
@@ -374,6 +375,21 @@ export default function AlignmentChart() {
       handleShowFriends();
     }
   };
+  
+  // Reset analysis to allow changing include replies option
+  const resetAnalysis = () => {
+    setHasAnalyzed(false);
+    setAnalysis(null);
+    setUserInfo(null);
+    setShareResult(null);
+    setShareSuccess(false);
+    setMintStatus(null);
+    setMintTxHash(null);
+    setMintTokenId(null);
+    setFriends([]);
+    setShowFriends(false);
+    setIncludeReplies(true);
+  };
 
   // Full-screen loading overlay
   if (loading) {
@@ -403,6 +419,40 @@ export default function AlignmentChart() {
             <span className="font-medium">
               {userInfo.displayName || userInfo.username || 'Anonymous User'}
             </span>
+          </div>
+        )}
+        
+        {/* Include Replies Checkbox - Only show when not already analyzed */}
+        {!hasAnalyzed && !loading && (
+          <div className="flex items-center justify-center mt-3">
+            <label className="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="form-checkbox h-4 w-4 text-purple-600 rounded"
+                checked={includeReplies}
+                onChange={() => setIncludeReplies(!includeReplies)}
+              />
+              <span className="ml-2 text-sm text-gray-700">Include replies in analysis</span>
+            </label>
+          </div>
+        )}
+        
+        {/* Analysis options display when analysis is complete */}
+        {hasAnalyzed && analysis && (
+          <div className="mt-2 flex flex-col items-center">
+            {includeReplies && (
+              <div className="text-xs text-gray-600 italic mt-1 mb-2">
+                Analysis includes replies
+              </div>
+            )}
+            {!includeReplies && (
+              <button
+                onClick={resetAnalysis}
+                className="text-xs px-2 py-1 text-blue-600 hover:text-blue 700 underline"
+              >
+                Try again including replies
+              </button>
+            )}
           </div>
         )}
         
